@@ -1,0 +1,71 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Verify Codebase Integrity
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URI: postgres://postgres:postgres@localhost:5432/rooted_boutique
+      PAYLOAD_SECRET: ci_secret_dummy_must_be_thirty_two_characters_long
+      PAYLOAD_CONFIG_PATH: src/payload/payload.config.ts
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm Package Manager
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Resolve Store Directory Path
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Configure Dependency Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Project Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Execute Strict Code Linting
+        run: pnpm lint
+
+      - name: Execute Strict TypeScript Verification
+        run: pnpm exec tsc --noEmit
+
+      - name: Execute Production-Build Validation
+        run: pnpm build
+
+      - name: Run Test Suite
+        shell: bash
+        run: |
+          if pnpm run | grep -q "test"; then
+            pnpm test
+          else
+            echo "::notice::No test suite configured in package.json. Skipping execution."
+          fi

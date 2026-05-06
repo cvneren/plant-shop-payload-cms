@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #334537;
+  --color-primary-light: #4A5D4E;
+  --color-secondary: #8C4E37;
+  --color-surface: #FFF8F5;
+  --color-ink: #1E1B18;
+
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+
+  --radius-button: 0.5rem;
+  --radius-card: 1.25rem;
+
+  --spacing-gutter: 1.25rem;
+  --container-max: 1440px;
+
+  --shadow-ambient: 0 10px 30px -10px rgba(51, 69, 55, 0.1);
+  --shadow-ambient-hover: 0 20px 40px -15px rgba(51, 69, 55, 0.15);
+}
+
+@media (width >=768px) {
+  :root {
+    --spacing-gutter: 4rem;
+  }
+}
+
+:root {
+  --background: var(--color-surface);
+  --foreground: var(--color-primary);
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(239, 230, 226, 0.6) 25%,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(239, 230, 226, 0.6) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite linear;
+}
